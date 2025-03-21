@@ -19,5 +19,5 @@ public interface ServiceCourse {
     String getCurrencyMain();
 
     //добавить новую валюту
-    boolean addNewCurrency(String name, String fullName, double cursCurrency);
+    boolean addNewCurrency(String newCurrencyName, String newCurrencyFullName, double newCource);
 }

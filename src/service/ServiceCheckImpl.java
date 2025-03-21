@@ -106,24 +106,24 @@ public class ServiceCheckImpl implements ServiceCheck {
         return transactionRepository.getTransactionListByIdUser(idUser);
     }
 
-    public boolean takeMoney(User user, int idCheck, double summa){
-        Optional<User> optUser = Optional.ofNullable(userRepository.isUserExistById(user.getIdUser()));
+    public boolean takeMoney(User activeUser, int idCheck, double summa){
+        Optional<User> optUser = Optional.ofNullable(userRepository.isUserExistById(activeUser.getIdUser()));
         try {
-            Validator.isUserExistById(optUser, user.getIdUser());
+            Validator.isUserExistById(optUser, activeUser.getIdUser());
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
         }
-        Optional<List<Check>> optChecks = Optional.ofNullable(getUserChecks(user.getIdUser()));
+        Optional<List<Check>> optChecks = Optional.ofNullable(getUserChecks(activeUser.getIdUser()));
         try {
-            Validator.getUserChecks(optChecks, user.getIdUser());
+            Validator.getUserChecks(optChecks, activeUser.getIdUser());
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
         }
-        Optional<Check> optCheck = Optional.ofNullable(checkRepository.getCheckByIdUserIdCheck(user.getIdUser(),idCheck));
+        Optional<Check> optCheck = Optional.ofNullable(checkRepository.getCheckByIdUserIdCheck(activeUser.getIdUser(),idCheck));
         try {
-            Validator.getCheckByIdUserIdCheck(optCheck, user.getIdUser(), idCheck);
+            Validator.getCheckByIdUserIdCheck(optCheck, activeUser.getIdUser(), idCheck);
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
@@ -134,45 +134,45 @@ public class ServiceCheckImpl implements ServiceCheck {
             System.out.println(e.getMessage());
             return false;
         }
-        Optional<Check> optCheck1 = Optional.ofNullable(checkRepository.takeMoney(user.getIdUser(), idCheck, summa));
-        Transaction transaction = new Transaction(user.getIdUser(), optCheck1.get().getCurrencyName(),
-                TransactionName.TAKE_MONEY, summa, LocalDateTime.now(), user.getIdUser(),0,0);
+        Optional<Check> optCheck1 = Optional.ofNullable(checkRepository.takeMoney(activeUser.getIdUser(), idCheck,summa));
+        Transaction transaction = new Transaction(activeUser.getIdUser(), optCheck1.get().getCurrencyName(),
+                TransactionName.TAKE_MONEY, summa, LocalDateTime.now(), activeUser.getIdUser(),0,0);
         transactionRepository.addTransaction(transaction);
         Optional<Transaction> optTrans = Optional.ofNullable(transaction);
-        if(optCheck1.isEmpty()||optCheck1.get() == null ||optTrans.isEmpty()|| optTrans.get() == null ){
+        if(optCheck1.isEmpty() || optCheck1.get() == null || optTrans.isEmpty() || optTrans.get() == null ){
             return false;
         }
         return true;
     }
 
-    public boolean depositMoney(User user, int idCheck, double summa) {
-        Optional<User> optUser = Optional.ofNullable(userRepository.isUserExistById(user.getIdUser()));
+    public boolean depositMoney(User ativeUser, int idCheck, double summa) {
+        Optional<User> optUser = Optional.ofNullable(userRepository.isUserExistById(ativeUser.getIdUser()));
         try {
-            Validator.isUserExistById(optUser, user.getIdUser());
+            Validator.isUserExistById(optUser, ativeUser.getIdUser());
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
         }
-        Optional<List<Check>> optChecks = Optional.ofNullable(getUserChecks(user.getIdUser()));
+        Optional<List<Check>> optChecks = Optional.ofNullable(getUserChecks(ativeUser.getIdUser()));
         try {
-            Validator.getUserChecks(optChecks, user.getIdUser());
+            Validator.getUserChecks(optChecks, ativeUser.getIdUser());
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
         }
-        Optional<Check> optCheck = Optional.ofNullable(checkRepository.getCheckByIdUserIdCheck(user.getIdUser(),idCheck));
+        Optional<Check> optCheck = Optional.ofNullable(checkRepository.getCheckByIdUserIdCheck(ativeUser.getIdUser(),idCheck));
         try {
-            Validator.getCheckByIdUserIdCheck(optCheck, user.getIdUser(), idCheck);
+            Validator.getCheckByIdUserIdCheck(optCheck, ativeUser.getIdUser(), idCheck);
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
         }
-        Optional<Check> optCheckDepo = Optional.ofNullable(checkRepository.depositMoney(user.getIdUser(),idCheck,summa));
-        Transaction transaction = new Transaction(user.getIdUser(), optCheckDepo.get().getCurrencyName(),
-                TransactionName.DEPOSIT_MONEY, summa, LocalDateTime.now(), user.getIdUser(),0,0);
+        Optional<Check> optCheckDepo = Optional.ofNullable(checkRepository.depositMoney(ativeUser.getIdUser(),idCheck,summa));
+        Transaction transaction = new Transaction(ativeUser.getIdUser(), optCheckDepo.get().getCurrencyName(),
+                TransactionName.DEPOSIT_MONEY, summa, LocalDateTime.now(), ativeUser.getIdUser(),0,0);
         transactionRepository.addTransaction(transaction);
         Optional<Transaction> optTrans = Optional.ofNullable(transaction);
-        if(optCheckDepo.isEmpty()|| optCheckDepo.get() == null || optTrans.isEmpty() || optTrans.get() == null ){
+        if(optCheckDepo.isEmpty() || optCheckDepo.get() == null || optTrans.isEmpty() || optTrans.get() == null ){
             return false;
         }
         return true;
@@ -182,58 +182,58 @@ public class ServiceCheckImpl implements ServiceCheck {
         return checkRepository.getCheckByIdUserIdCheck(idUser,idCheck);
     }
 
-    public boolean transferMoneyToUser(User outUser, User inUser, int idOutUserCheck, int idInUserCheck, double summa) {
-        Optional<List<Check>> optCheckLis = Optional.ofNullable(getUserChecks(outUser.getIdUser()));
+    public boolean transferMoneyToUser(User activeUser, User userRecipient, int idCheck, int idCheck2, double summa) {
+        Optional<List<Check>> optCheckLis = Optional.ofNullable(getUserChecks(activeUser.getIdUser()));
         try {
-            Validator.getUserChecks(optCheckLis, outUser.getIdUser());
+            Validator.getUserChecks(optCheckLis, activeUser.getIdUser());
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
         }
-        Optional<Check> optCheck = Optional.ofNullable(checkRepository.getCheckByIdUserIdCheck(outUser.getIdUser(),idOutUserCheck));
+        Optional<Check> optCheck = Optional.ofNullable(checkRepository.getCheckByIdUserIdCheck(activeUser.getIdUser(),idCheck));
         try {
             Validator.summaCheck(optCheck, summa);
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
         }
-        Optional<List<Check>> optiNUserChecks = Optional.ofNullable(checkRepository.getUserChecks(inUser.getIdUser()));
+        Optional<List<Check>> optiNUserChecks = Optional.ofNullable(checkRepository.getUserChecks(userRecipient.getIdUser()));
         try {
-            Validator.getUserChecks(optiNUserChecks, inUser.getIdUser());
+            Validator.getUserChecks(optiNUserChecks, userRecipient.getIdUser());
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
         }
-        checkRepository.takeMoney(outUser.getIdUser(), idOutUserCheck, summa);
-        Optional<Check> optCheck1 = Optional.ofNullable(optiNUserChecks.get().get(idInUserCheck - 1));
+        checkRepository.takeMoney(activeUser.getIdUser(), idCheck, summa);
+        Optional<Check> optCheck1 = Optional.ofNullable(optiNUserChecks.get().get(idCheck2 - 1));
         double currencyOut = courseRepository.getCourseByCurrencyName(optCheck.get().getCurrencyName());
         double currencyIn = courseRepository.getCourseByCurrencyName(optCheck1.get().getCurrencyName());
         double currencyMain = courseRepository.getCourseByCurrencyName(courseRepository.getCurrencyMain());
         double summaIn = ((summa / currencyOut) * currencyIn);
-        checkRepository.depositMoney(inUser.getIdUser(), optCheck1.get().getIdCheck(), summaIn);
+        checkRepository.depositMoney(userRecipient.getIdUser(), optCheck1.get().getIdCheck(), summaIn);
 
-        Transaction transaction1 = new Transaction(outUser.getIdUser(), optCheck.get().getCurrencyName(),
-                TransactionName.TRANSFER_MONEY_OUT, summa, LocalDateTime.now(), inUser.getIdUser(),
-                outUser.getIdUser(),0);
+        Transaction transaction1 = new Transaction(activeUser.getIdUser(), optCheck.get().getCurrencyName(),
+                TransactionName.TRANSFER_MONEY_OUT, summa, LocalDateTime.now(), userRecipient.getIdUser(),
+                activeUser.getIdUser(),0);
         transactionRepository.addTransaction(transaction1);
-        Transaction transaction2 = new Transaction(inUser.getIdUser(), optCheck1.get().getCurrencyName(),
-                TransactionName.TRANSFER_MONEY_IN, summaIn, LocalDateTime.now(), inUser.getIdUser(),
-                outUser.getIdUser(),0);
+        Transaction transaction2 = new Transaction(userRecipient.getIdUser(), optCheck1.get().getCurrencyName(),
+                TransactionName.TRANSFER_MONEY_IN, summaIn, LocalDateTime.now(), userRecipient.getIdUser(),
+                activeUser.getIdUser(),0);
         transactionRepository.addTransaction(transaction2);
         return true;
     }
 
-    public boolean transferMoneyToMe(User user, int idOutUserCheck, int idInUserCheck, double summa) {
-        Optional<Check> optCheck = Optional.ofNullable(checkRepository.getCheckByIdUserIdCheck(user.getIdUser(),idOutUserCheck));
-        Optional<Check> optCheck2 = Optional.ofNullable(checkRepository.getCheckByIdUserIdCheck(user.getIdUser(),idInUserCheck));
+    public boolean transferMoneyToMe(User activeUser, int idCheck, int idCheck2, double summa) {
+        Optional<Check> optCheck = Optional.ofNullable(checkRepository.getCheckByIdUserIdCheck(activeUser.getIdUser(),idCheck));
+        Optional<Check> optCheck2 = Optional.ofNullable(checkRepository.getCheckByIdUserIdCheck(activeUser.getIdUser(),idCheck2));
         try {
-            Validator.getCheckByIdUserIdCheck(optCheck, user.getIdUser(), idOutUserCheck);
+            Validator.getCheckByIdUserIdCheck(optCheck, activeUser.getIdUser(), idCheck);
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
         }
         try {
-            Validator.getCheckByIdUserIdCheck(optCheck2, user.getIdUser(), idInUserCheck);
+            Validator.getCheckByIdUserIdCheck(optCheck2, activeUser.getIdUser(), idCheck2);
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
@@ -245,27 +245,27 @@ public class ServiceCheckImpl implements ServiceCheck {
             return false;
         }
         try {
-            Validator.isChecksEquals(idOutUserCheck, idInUserCheck);
+            Validator.isChecksEquals(idCheck, idCheck2);
         } catch (ValidatorException e) {
             System.out.println(e.getMessage());
             return false;
         }
-        checkRepository.takeMoney(user.getIdUser(), idOutUserCheck, summa);
+        checkRepository.takeMoney(activeUser.getIdUser(), idCheck, summa);
         double currencyOut = courseRepository.getCourseByCurrencyName(optCheck.get().getCurrencyName());
         double currencyIn = courseRepository.getCourseByCurrencyName(optCheck2.get().getCurrencyName());
         double currencyMain = courseRepository.getCourseByCurrencyName(courseRepository.getCurrencyMain());
         double summaIn = ((summa / currencyOut) * currencyIn);
-        checkRepository.depositMoney(user.getIdUser(), optCheck2.get().getIdCheck(), summaIn);
+        checkRepository.depositMoney(activeUser.getIdUser(), optCheck2.get().getIdCheck(), summaIn);
 
-        Transaction transaction1 = new Transaction(user.getIdUser(), optCheck2.get().getCurrencyName(),
-                TransactionName.TRANSFER_MONEY_OUT, summa, LocalDateTime.now(), user.getIdUser(),
-                user.getIdUser(),0);
+        Transaction transaction1 = new Transaction(activeUser.getIdUser(), optCheck2.get().getCurrencyName(),
+                TransactionName.TRANSFER_MONEY_OUT, summa, LocalDateTime.now(), activeUser.getIdUser(),
+                activeUser.getIdUser(),0);
         transactionRepository.addTransaction(transaction1);
         return true;
     }
 
     public boolean  addCheckUser(String currencyName, boolean status, double summa,
-                                 LocalDate addDate, int idUser){
+                                 LocalDate openDate, int idUser){
         try {
             Validator.isSummaLessZero(summa);
         } catch (ValidatorException e) {
@@ -287,14 +287,14 @@ public class ServiceCheckImpl implements ServiceCheck {
             System.out.println(e.getMessage());
             return false;
         }
-        checkRepository.addCheckUser(currencyName, status, summa, addDate, idUser);
+        checkRepository.addCheckUser(currencyName, status, summa, openDate, idUser);
         return true;
     }
 
-    public boolean delChecksByIdUser(int idUser){
+    public boolean deleteChecksByIdUser(int idUser){
         Optional<List<Check>> optUserChecks = Optional.ofNullable(checkRepository.getUserChecks(idUser));
         if(optUserChecks.isPresent()) {
-            checkRepository.delCheckByIdUser(idUser);
+            checkRepository.deleteCheckByIdUser(idUser);
             return true;
         }
         return false;

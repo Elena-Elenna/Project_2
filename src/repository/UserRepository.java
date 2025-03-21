@@ -2,8 +2,6 @@ package repository;
 
 import model.Role;
 import model.User;
-
-import java.time.LocalDate;
 import java.util.Map;
 
 public interface UserRepository {
@@ -27,7 +25,7 @@ public interface UserRepository {
     boolean userUpdatePassword(int idUser, String newPassword);
 
     //удалить пользователя
-    User delUser(int idUser);
+    User deleteUser(int idUser);
 
     //получить всех пользователей
     Map<Integer,User> getUsers();

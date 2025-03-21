@@ -17,6 +17,7 @@ public class Validator {
         this.serviceUser = serviceUser;
     }
 
+
     public static void isEmailValid(String email) throws ValidatorException {
         int index = email.indexOf("@");
         if(index == -1 || index != email.lastIndexOf("@"))

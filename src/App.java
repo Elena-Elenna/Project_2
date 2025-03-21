@@ -24,25 +24,6 @@ public class App {
 }
 
 /*
-
-    public static final String COLOR_RESET = "\u001B[0m";   //сбросить цвет
-    public static final String COLOR_RED = "\u001B[31m";  //красный
-    public static final String COLOR_GREEN = "\u001B[32m"; //зеленый
-    public static final String COLOR_YELLOW = "\u001B[33m"; //желтый
-    public static final String COLOR_BLUE = "\u001B[34m"; //синий
-    public static final String COLOR_PURPLE = "\u001B[35m"; //фиолетовый
-    public static final String COLOR_CYAN = "\u001B[36m"; //голубой
-
-    public static final String BRIGHT_RED = "\u001B[91m";
-    public static final String BRIGHT_GREEN = "\u001B[92m";
-    public static final String BRIGHT_YELLOW = "\u001B[93m";
-    public static final String BRIGHT_BLUE = "\u001B[94m";
-    public static final String BRIGHT_PURPLE = "\u001B[95m";
-    public static final String BRIGHT_CYAN = "\u001B[96m";
-
-
- */
-/*
                   Проект "Обменный пункт валюты"
          Описание проекта:
 Разработать консольное приложение для имитации работы обменного пункта валюты.

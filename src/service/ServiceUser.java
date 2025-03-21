@@ -32,7 +32,7 @@ public interface ServiceUser {
     Map<Integer, User> getUsers();
 
     //изменить пароль пользователя
-    boolean userUpdatePassword(int idUser, String password);
+    boolean userUpdatePassword(int idUser, String newPassword);
 
     //изменить статус пользователя
     boolean userStatusUpdate(int idUser, Role role);

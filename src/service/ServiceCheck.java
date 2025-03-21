@@ -22,23 +22,23 @@ public interface ServiceCheck {
      List<Transaction> getTransactionListByIdUser(int idUser);
 
     //взять деньги ++
-    boolean takeMoney(User user, int idCheck, double summa);
+    boolean takeMoney(User activeUser, int idCheck, double summa);
 
     //внести деньги ++
-    boolean depositMoney(User user,int idCheck,double summa);
+    boolean depositMoney(User ativeUser,int idCheck,double summa);
 
     //получить счет пользователя (по id счета)
     Check getCheckByIdUserIdCheck(int idUser, int idCheck);
 
     //перевести деньги пользователю ++
-    boolean transferMoneyToUser(User outUser,User inUser,int idOutUserCheck, int idInUserCheck, double summa);
+    boolean transferMoneyToUser(User activeUser,User userRecipient,int idCheck, int idCheck2, double summa);
 
     //перевести деньги себе ++
-    boolean transferMoneyToMe(User user,int idOutUserCheck,int idInUserCheck, double summa);
+    boolean transferMoneyToMe(User activeUser,int idCheck,int idCheck2, double summa);
 
     //добавить счет пользователю
     boolean  addCheckUser(String currencyName, boolean status, double summa,
-                                 LocalDate addDate, int idUser);
+                                 LocalDate openDate, int idUser);
     //удалить счет пользователя
-    boolean delChecksByIdUser(int idUser);
+    boolean deleteChecksByIdUser(int idUser);
 }

@@ -7,17 +7,14 @@ import java.util.Objects;
 
 public class CourseCurrency {
 
-    //курс валют (UA-45,0)
-    private Map<String, Double> course = new LinkedHashMap<String, Double>();
-    //названия валют(UA-Гривня)
-    private Map<String, String> courseFillName = new LinkedHashMap<String, String>();
+    //поля
+    private Map<String, Double> course = new LinkedHashMap<String, Double>();//курс валют (UA-45,0)
+    private Map<String, String> courseFillName = new LinkedHashMap<String, String>();//названия валют (UA-Гривня)
     private String currencyMain;//валюта основная
     private LocalDate dateCurrency;//дата курса
 
-
     //конструктор
     public CourseCurrency() {
-
     }
 
 
@@ -51,7 +48,6 @@ public class CourseCurrency {
 
     public void setCurrencyMain(String currencyMain) {
         this.currencyMain = currencyMain;
-
     }
 
     @Override

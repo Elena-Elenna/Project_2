@@ -14,7 +14,7 @@ public class ServiceUserImpl implements ServiceUser {
     private final UserRepository userRepository;
     private final ServiceCheck serviceCheck;
 
-    //поля (авторизованный пользователь)
+    //поле (авторизованный пользователь)
     private User activUser;
 
     //конструктор
@@ -64,7 +64,7 @@ public class ServiceUserImpl implements ServiceUser {
         userRepository.addUser(firstName.trim(), lastName.trim(), email.trim(), password.trim());
         return true;
     }
-    //TODO
+
     public boolean loginUser(String email, String password) {
         if (activUser != null) {
             logout();
@@ -91,13 +91,12 @@ public class ServiceUserImpl implements ServiceUser {
                     return true;
                 }
                 if (entry.getValue().getRole() == Role.BLOCKED) {
-//                    System.out.println("Вы ЗАБЛОКИРОВАНЫ ! Обратитесь к администратору");
                     return false;
                 }
             }
         }
         return true;
-}
+    }
 
     public void logout() {
         this.activUser = null;
@@ -117,8 +116,8 @@ public class ServiceUserImpl implements ServiceUser {
             System.out.println(e.getMessage());
             return false;
         }
-        serviceCheck.delChecksByIdUser(idUser);
-        userRepository.delUser(idUser);
+        serviceCheck.deleteChecksByIdUser(idUser);
+        userRepository.deleteUser(idUser);
         return true;
     }
 
@@ -126,7 +125,7 @@ public class ServiceUserImpl implements ServiceUser {
         return this.userRepository.getUsers();
     }
 
-    public boolean userUpdatePassword(int idUser, String password) {
+    public boolean userUpdatePassword(int idUser, String newPassword) {
         boolean exit = false;
         Optional<User> optUser = Optional.ofNullable(userRepository.isUserExistById(idUser));
         try {
@@ -136,13 +135,13 @@ public class ServiceUserImpl implements ServiceUser {
             return false;
         }
         try {
-            Validator.isPasswordValid(password.trim());
+            Validator.isPasswordValid(newPassword.trim());
         } catch (ValidatorException e) {
             exit = true;
             System.out.println(e.getMessage());
         }
         if(exit == true) return false;
-        this.userRepository.userUpdatePassword(idUser, password);
+        this.userRepository.userUpdatePassword(idUser, newPassword);
         return true;
     }
 
@@ -168,7 +167,7 @@ public class ServiceUserImpl implements ServiceUser {
     public boolean isEmailExist(String email){
         return userRepository.isEmailExist(email);
     }
-//Todo
+    //Todo
     public boolean isUserBlocked(String email){
         Optional<User> optUser = Optional.ofNullable(userRepository.getUserByEmail(email));
         if (optUser.get().getRole() == Role.BLOCKED) return true;

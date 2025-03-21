@@ -5,13 +5,14 @@ import java.util.Objects;
 
 public class Transaction {
 
+    //поля
     private int idUser;
     private String currencyName;//название валюты
     private TransactionName typeTransaction;//название транзакции(enum)
     private double summa;
     private LocalDateTime dateTransaction;
     private int idUserRecipient;// получатель
-    private int idUserOut;//отправитель
+    private int idActiveUser;//отправитель
     private int numberTransaction;
 
     //конструктор
@@ -23,7 +24,7 @@ public class Transaction {
         this.summa = summa;
         this.dateTransaction = dateTransaction;
         this.idUserRecipient = idUserRecipient;
-        this.idUserOut = idUserOut;
+        this.idActiveUser = idUserOut;
         this. numberTransaction = numberTransaction;
     }
 
@@ -41,33 +42,33 @@ public class Transaction {
         return currencyName.trim();
     }
 
-//    public void setCurrencyName(String currencyName) {
-//        this.currencyName = currencyName.trim();
-//    }
+    public void setCurrencyName(String currencyName) {
+        this.currencyName = currencyName.trim();
+    }
 
     public TransactionName getTypeTransaction() {
         return typeTransaction;
     }
 
-//    public void setTypeTransaction(TransactionName typeTransaction) {
-//        this.typeTransaction = typeTransaction;
-//    }
+    public void setTypeTransaction(TransactionName typeTransaction) {
+        this.typeTransaction = typeTransaction;
+    }
 
     public double getSumma() {
         return summa;
     }
 
-//    public void setSumma(double summa) {
-//        this.summa = summa;
-//    }
+    public void setSumma(double summa) {
+        this.summa = summa;
+    }
 
     public LocalDateTime getDateTransaction() {
         return dateTransaction;
     }
 
-//    public void setDateTransaction(LocalDateTime dateTransaction) {
-//        this.dateTransaction = dateTransaction;
-//    }
+    public void setDateTransaction(LocalDateTime dateTransaction) {
+        this.dateTransaction = dateTransaction;
+    }
 
     public int getNumberTransaction() {
         return numberTransaction;
@@ -81,17 +82,17 @@ public class Transaction {
         return idUserRecipient;
     }
 
-//    public void setIdUserRecipient(int idUserRecipient) {
-//        this.idUserRecipient = idUserRecipient;
-//    }
-
-    public int getIdUserOut() {
-        return idUserOut;
+    public void setIdUserRecipient(int idUserRecipient) {
+        this.idUserRecipient = idUserRecipient;
     }
 
-//    public void setIdUserOut(int idUserOut) {
-//        this.idUserOut = idUserOut;
-//    }
+    public int getIdActiveUser() {
+        return idActiveUser;
+    }
+
+    public void setIdActiveUser(int idActiveUser) {
+        this.idActiveUser = idActiveUser;
+    }
 
     @Override
     public String toString() {
@@ -102,7 +103,7 @@ public class Transaction {
                 "; summa = " + summa +
                 "; dateTransaction = " + dateTransaction +
                 "; idUserRecipient = " + idUserRecipient +
-                "; idUserOut = " + idUserOut +
+                "; idUserOut = " + idActiveUser +
                 "; numberTransaction = " + numberTransaction +
                 '}';
     }
@@ -113,7 +114,7 @@ public class Transaction {
         if (o == null || getClass() != o.getClass()) return false;
         Transaction that = (Transaction) o;
         return idUser == that.idUser && Double.compare(summa, that.summa) == 0
-                && idUserRecipient == that.idUserRecipient && idUserOut == that.idUserOut
+                && idUserRecipient == that.idUserRecipient && idActiveUser == that.idActiveUser
                 && numberTransaction == that.numberTransaction && Objects.equals(currencyName, that.currencyName)
                 && typeTransaction == that.typeTransaction && Objects.equals(dateTransaction, that.dateTransaction);
     }
@@ -121,6 +122,6 @@ public class Transaction {
     @Override
     public int hashCode() {
         return Objects.hash(idUser, currencyName, typeTransaction, summa, dateTransaction,
-                idUserRecipient, idUserOut, numberTransaction);
+                idUserRecipient, idActiveUser, numberTransaction);
     }
 }

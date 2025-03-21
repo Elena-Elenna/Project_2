@@ -9,9 +9,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class UserRepositoryImpl implements UserRepository {
-    //поля список всех пользователей (id-пользователь)
-    private Map<Integer, User> users = new LinkedHashMap<>();
-    private int numberUsers = 0; //id счетчик пользователя
+    //поля
+    private Map<Integer, User> users = new LinkedHashMap<>();//список всех пользователей (id-пользователь)
+    private int numberUsers = 0; //счетчик пользователей (при создании нового пользователя увеличивается на 1)
 
     //конструктор
     public UserRepositoryImpl() {
@@ -55,14 +55,13 @@ public class UserRepositoryImpl implements UserRepository {
         return null;
     }
 
-
     public boolean userUpdatePassword(int idUser, String newPassword) {
         User user = users.get(idUser);
         user.setPassword(newPassword);
         return true;
     }
 
-    public User delUser(int idUser) {
+    public User deleteUser(int idUser) {
         return users.remove(idUser);
     }
 
@@ -79,169 +78,75 @@ public class UserRepositoryImpl implements UserRepository {
         return false;
     }
 
-//    public void writeUsersToFile(){
-//        Map<Integer,User> usersToFile = getUsers();
-//        File path = new File("src/files");
-//        path.mkdirs();
-//        File fileUsers = new File(path,"users.txt");
-//        if(usersToFile == null) return;
-//        if(usersToFile.size() == 0)  return;
-//        if(fileUsers.exists()) fileUsers.delete();
-//        //создать файл если его еще нет
-//        try {
-//            fileUsers.createNewFile();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        try(BufferedWriter bWriter1=new BufferedWriter(new FileWriter(fileUsers,true)))
-//        {
-//            String str = "" + numberUsers;
-//            bWriter1.write(str);
-//            bWriter1.newLine();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        for (Map.Entry<Integer, User> entry : usersToFile.entrySet()) {
-//            try(BufferedWriter bWriter = new BufferedWriter(new FileWriter(fileUsers,true)))
-//            {
-//                String str1 = entry.getKey() + "^" + entry.getValue().getFirstName() + "^"
-//                        + entry.getValue().getLastName() + "^" + entry.getValue().getIdUser() + "^"
-//                        + entry.getValue().getEmail() + "^" + entry.getValue().getPassword() + "^"
-//                        + entry.getValue().getDateRegistration() + "^" + entry.getValue().getDateLastEntrance()
-//                        + "^" + entry.getValue().getRole();
-//                bWriter.write(str1);
-//                bWriter.newLine();
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//    }
-
-    public void writeUsersToFile() {
-        Map<Integer, User> usersToFile = getUsers();
-        if (usersToFile == null || usersToFile.isEmpty()) {
-            return;
-        }
-
-        File fileUsers = new File("src/files", "users.txt");
-        fileUsers.getParentFile().mkdirs(); // Создаем директорию, если её нет
-
-        // Удаляем старый файл и создаем новый
-        if (fileUsers.exists()) {
-            fileUsers.delete();
-        }
+    public void writeUsersToFile(){
+        Map<Integer,User> usersToFile = getUsers();
+        File path = new File("src/files");
+        path.mkdirs();
+        File fileUsers = new File(path,"users.txt");
+        if(usersToFile == null) return;
+        if(usersToFile.size() == 0)  return;
+        if(fileUsers.exists()) fileUsers.delete();
         try {
             fileUsers.createNewFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileUsers, true))) {
-            // Записываем количество пользователей
-            writer.write(String.valueOf(numberUsers));
-            writer.newLine();
-
-            // Записываем каждого пользователя
-            for (User user : usersToFile.values()) {
-                writer.write(formatUser(user));
-                writer.newLine();
-            }
+        try(BufferedWriter bWriter1=new BufferedWriter(new FileWriter(fileUsers,true)))
+        {
+            String str = "" + numberUsers;
+            bWriter1.write(str);
+            bWriter1.newLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    // Метод для форматирования пользователя в строку
-    private String formatUser(User user) {
-        return user.getIdUser() + "^" +
-                user.getFirstName() + "^" +
-                user.getLastName() + "^" +
-                user.getEmail() + "^" +
-                user.getPassword() + "^" +
-                user.getDateRegistration() + "^" +
-                user.getDateLastEntrance() + "^" +
-                user.getRole();
-    }
-
-//    public void  readUsersFromFile(){
-//        File path = new File("src/files");
-//        File fileUsers = new File(path,"users.txt");
-//        if(fileUsers.exists() == false || fileUsers.length() == 0) {
-//            return;
-//        }
-//        try(BufferedReader bReader = new BufferedReader(new FileReader(fileUsers)))
-//        {
-//            String line;
-//            line = bReader.readLine();
-//            numberUsers = Integer.parseInt(line);
-//            while ((line = bReader.readLine()) != null) {
-//                if(line.length() == 0) continue;
-//                String [] parts = line.split("\\^");
-//                int id = Integer.parseInt(parts[0]);
-//                User user = new User(parts[1], parts[2], Integer.parseInt(parts[3]), parts[4], parts[5]);
-//                LocalDate dateRegistration = LocalDate.parse(parts[6]);
-//                LocalDate dateLastEntrance = LocalDate.parse(parts[7]);
-//                Role role = null;
-//                if (parts[8].equals("ADMIN")) role = Role.ADMIN;
-//                if (parts[8].equals("USER")) role = Role.USER;
-//                if (parts[8].equals("BLOCKED")) role = Role.BLOCKED;
-//                if (parts[8].equals("BLOCKED_TRANSACTION")) role = Role.BLOCKED_TRANSACTION;
-//                user.setRole(role);
-//                user.setDateRegistration(dateRegistration);
-//                user.setDateLastEntrance(dateLastEntrance);
-//                users.put(id,user);
-//            }
-//        } catch (FileNotFoundException e) {
-//            throw new RuntimeException(e);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-public void readUsersFromFile() {
-    File fileUsers = new File("src/files", "users.txt");
-
-    // Проверяем, существует ли файл и не является ли он пустым
-    if (!fileUsers.exists() || fileUsers.length() == 0) {
-        return;
-    }
-
-    try (BufferedReader reader = new BufferedReader(new FileReader(fileUsers))) {
-        // Читаем и устанавливаем количество пользователей
-        String line = reader.readLine();
-        if (line != null) {
-            numberUsers = Integer.parseInt(line.trim());
-        }
-
-        // Читаем пользователей из файла
-        while ((line = reader.readLine()) != null) {
-            if (!line.trim().isEmpty()) {
-                User user = parseUser(line);
-                users.put(user.getIdUser(), user);
+        for (Map.Entry<Integer, User> entry : usersToFile.entrySet()) {
+            try(BufferedWriter bWriter = new BufferedWriter(new FileWriter(fileUsers,true)))
+            {
+                String str1 = entry.getKey() + "^" + entry.getValue().getFirstName() + "^"
+                        + entry.getValue().getLastName() + "^" + entry.getValue().getIdUser() + "^"
+                        + entry.getValue().getEmail() + "^" + entry.getValue().getPassword() + "^"
+                        + entry.getValue().getDateRegistration() + "^" + entry.getValue().getDateLastEntrance()
+                        + "^" + entry.getValue().getRole();
+                bWriter.write(str1);
+                bWriter.newLine();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
-    } catch (IOException e) {
-        throw new RuntimeException(e);
     }
-}
-    // Метод для парсинга строки в объект User
-    private User parseUser(String line) {
-        String[] parts = line.split("\\^");
-        if (parts.length != 9) {
-            throw new IllegalArgumentException(line);
+
+    public void  readUsersFromFile(){
+        File path = new File("src/files");
+        File fileUsers = new File(path,"users.txt");
+        if(fileUsers.exists() == false || fileUsers.length() == 0) {
+            return;
         }
-        int idUser = Integer.parseInt(parts[0].trim());
-        String firstName = parts[1].trim();
-        String lastName = parts[2].trim();
-        int parsedIdUser = Integer.parseInt(parts[3].trim());
-        String email = parts[4].trim();
-        String password = parts[5].trim();
-        LocalDate dateRegistration = LocalDate.parse(parts[6].trim());
-        LocalDate dateLastEntrance = LocalDate.parse(parts[7].trim());
-        Role role = Role.valueOf(parts[8].trim()); // Преобразование строки в enum
-        User user = new User(firstName, lastName, parsedIdUser, email, password);
-        user.setDateRegistration(dateRegistration);
-        user.setDateLastEntrance(dateLastEntrance);
-        user.setRole(role);
-        return user;
+        try(BufferedReader bReader = new BufferedReader(new FileReader(fileUsers)))
+        {
+            String line;
+            line = bReader.readLine();
+            numberUsers = Integer.parseInt(line);
+            while ((line = bReader.readLine()) != null) {
+                if(line.length() == 0) continue;
+                String [] parts = line.split("\\^");
+                int id = Integer.parseInt(parts[0]);
+                User user = new User(parts[1], parts[2], Integer.parseInt(parts[3]), parts[4], parts[5]);
+                LocalDate dateRegistration = LocalDate.parse(parts[6]);
+                LocalDate dateLastEntrance = LocalDate.parse(parts[7]);
+                Role role = null;
+                if (parts[8].equals("ADMIN")) role = Role.ADMIN;
+                if (parts[8].equals("USER")) role = Role.USER;
+                if (parts[8].equals("BLOCKED")) role = Role.BLOCKED;
+                if (parts[8].equals("BLOCKED_TRANSACTION")) role = Role.BLOCKED_TRANSACTION;
+                user.setRole(role);
+                user.setDateRegistration(dateRegistration);
+                user.setDateLastEntrance(dateLastEntrance);
+                users.put(id,user);
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

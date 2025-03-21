@@ -5,6 +5,7 @@ import java.util.Objects;
 
 public class Check {
 
+    //поля
     private String currencyName;//название валюты
     private boolean status;//статус счета
     private double summa;
@@ -31,17 +32,17 @@ public class Check {
         return idCheck;
     }
 
-//    public void setIdCheck(int idCheck) {
-//        this.idCheck = idCheck;
-//    }
+    public void setIdCheck(int idCheck) {
+        this.idCheck = idCheck;
+    }
 
     public String getCurrencyName() {
         return currencyName.trim();
     }
 
-//    public void setCurrencyName(String currencyName) {
-//        this.currencyName = currencyName.trim();
-//    }
+    public void setCurrencyName(String currencyName) {
+        this.currencyName = currencyName.trim();
+    }
 
     public void setIdUser(int idUser) {
         this.idUser = idUser;
@@ -67,9 +68,9 @@ public class Check {
         return openDate;
     }
 
-//    public void setOpenDate(LocalDate openDate) {
-//        this.openDate = openDate;
-//    }
+    public void setOpenDate(LocalDate openDate) {
+        this.openDate = openDate;
+    }
 
     public LocalDate getCloseDate() {
         return closeDate;

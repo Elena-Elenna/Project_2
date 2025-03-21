@@ -1,11 +1,7 @@
 package service;
 
 import model.CourseCurrency;
-import model.User;
-import repository.CheckRepository;
 import repository.CourseRepository;
-import repository.TransactionRepository;
-import repository.UserRepository;
 import utils.Validator;
 import utils.ValidatorException;
 
@@ -23,7 +19,7 @@ public class ServiceCourseImpl implements ServiceCourse {
     }
 
 
-    public List<CourseCurrency> getCourses(){//COURSE
+    public List<CourseCurrency> getCourses(){
         return courseRepository.getCourses();
     }
 
@@ -40,29 +36,29 @@ public class ServiceCourseImpl implements ServiceCourse {
         return courseRepository.getCurrencyMain();
     }
 
-    public boolean addNewCurrency(String name, String fullName, double cursCurrency){
-        if(name == null) return false;
-        if(name.length() == 0) return false;
-        if(fullName == null) return false;
-        if(fullName.length() == 0) return false;
+    public boolean addNewCurrency(String newCurrencyName, String newCurrencyFullName, double newCource){
+        if(newCurrencyName == null) return false;
+        if(newCurrencyName.length() == 0) return false;
+        if(newCurrencyFullName == null) return false;
+        if(newCurrencyFullName.length() == 0) return false;
         Optional<Map<String,String>> optMapNames = Optional.ofNullable(courseRepository.getNamesCurrency());
         if(optMapNames.isPresent()) {
             for (Map.Entry<String,String> entry : optMapNames.get().entrySet()) {
                 try {
-                    Validator.isCurrencyPresent(entry.getKey(),name);
+                    Validator.isCurrencyPresent(entry.getKey(), newCurrencyName);
                 } catch (ValidatorException e) {
                     System.out.println(e.getMessage());
                     return false;
                 }
             }
         }
-        courseRepository.addNameCurrency(name, fullName);
+        courseRepository.addNameCurrency(newCurrencyName, newCurrencyFullName);
         CourseCurrency cc = courseRepository.getCourseLast();
         Optional<Map<String,Double>> optCourses = Optional.ofNullable(cc.getCourse());
         Optional<Map<String,String>> optCoursesFillName = Optional.ofNullable(cc.getCourseFillName());
         if(!optCourses.isEmpty() && !optCoursesFillName.isEmpty()) {
-            optCourses.get().put(name, cursCurrency);
-            optCoursesFillName.get().put(name, fullName);
+            optCourses.get().put(newCurrencyName, newCource);
+            optCoursesFillName.get().put(newCurrencyName, newCurrencyFullName);
         }
         return true;
     }

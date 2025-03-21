@@ -11,7 +11,7 @@ public interface CourseRepository {
     Map<String, String> getNamesCurrency();
 
     //добавить название валюты
-    void addNameCurrency(String name, String fullName);
+    void addNameCurrency(String newCurrencyName, String newCurrencyFullName);
 
     //получить курсы (валют)
     List<CourseCurrency> getCourses();

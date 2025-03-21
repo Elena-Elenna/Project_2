@@ -25,10 +25,11 @@ public class Menu {
     private final CheckRepository checkRepository;
     private final TransactionRepository transactionRepository;
     private final CourseRepository courseRepository;
+    private final Scanner scanner = new Scanner(System.in);
+
     //поля
     private boolean exitAdminMenu;//выход из меню администратора
     private boolean exitUserMenu;//выход из меню пользователя
-    private final Scanner scanner = new Scanner(System.in);
 
     //конструктор
     public Menu(ServiceCheck serviceCheck, ServiceCourse serviceCourse, ServiceUser serviceUser,
@@ -117,9 +118,8 @@ public class Menu {
     private boolean registrationUser() {
         String email;
         String password;
-        String str1;
-        String str2;
-        boolean register;
+        String firstName;
+        String lastName;
         System.out.print("\n\u001B[36mВведите Email пользователя: \u001B[0m");
         email = scanner.nextLine().trim();
         if (email.length() == 0 || email == null ) {
@@ -144,12 +144,12 @@ public class Menu {
             return false;
         }
         System.out.print("\u001B[36mВведите Имя пользователя: \u001B[0m");
-        str1 = scanner.nextLine().trim();
+        firstName = scanner.nextLine().trim();
         System.out.print("\u001B[36mВведите Фамилию пользователя: \u001B[0m");
-        str2 = scanner.nextLine().trim();
-        register = serviceUser.registerUser(str1, str2, email, password);
-        if (register == true){
-            System.out.println("\u001B[33mПользователь: \u001B[0m'" + str1 + " " + str2 +
+        lastName = scanner.nextLine().trim();
+        boolean isRegister = serviceUser.registerUser(firstName, lastName, email, password);
+        if (isRegister == true){
+            System.out.println("\u001B[33mПользователь: \u001B[0m'" + firstName + " " + lastName +
                     "'\u001B[33m  c Email: \u001B[0m" + email + "\u001B[33m успешно зарегистрирован\u001B[0m");
             return true;
         } else {
@@ -158,10 +158,7 @@ public class Menu {
         return false;
     }
 
-
     private int InputUser() {
-        boolean isAutorized = false;
-        boolean isRegistration = false;
         while (true) {
             System.out.println("\u001B[92m\nДОБРО ПОЖАЛОВАТЬ В 'ОБМЕН ВАЛЮТ!'\u001B[0m");
             System.out.println("\u001B[93m    1. Авторизация\u001B[0m");
@@ -174,11 +171,10 @@ public class Menu {
                     transactionRepository.writeTransactionToFile();
                     courseRepository.writeCurseToFile();
                     courseRepository.writeCurseNameToFile();
-//                    System.out.println("До свидания!");
                     System.exit(0);
                     break;
                 case 1:
-                    isAutorized = authorizationUser();
+                    boolean isAutorized = authorizationUser();
                     if (isAutorized == true ) {
                         showMenu();
                     } else {
@@ -186,7 +182,7 @@ public class Menu {
                     }
                     break;
                 case 2:
-                    isRegistration = registrationUser();
+                    boolean isRegistration = registrationUser();
                     if (isRegistration == true ) {
                         showMenu();
                     } else {
@@ -218,52 +214,41 @@ public class Menu {
     }
 
     private void showUserMenuCase(int input) {
-        int numberCheck = -1;
-        int numberCheck2 = -1;
-        int idUserTransfer = 0;
-        int checkSize = 0;
-        double tempSumma = 0.0;
-        boolean isTakeMoney = false;
-        boolean isDepositMoney = false;
-        boolean isTransferMoney = false;
         switch (input) {
             case 0:
                 exitUserMenu = true;
                 System.out.println("Вы вышли из МЕНЮ ПОЛЬЗОВАТЕЛЯ.");
                 break;
-            case 1:// Состояние счетов
+            case 1:
                 System.out.println("\u001B[93m\nСОСТОЯНИЕ СЧЕТА:\u001B[0m");
                 printCheckList(serviceUser.getActivUser(),"\u001B[33mСписок счетов: \u001B[0m");
                 break;
-            case 2: // Снятие денег
+            case 2:
                 System.out.println("\u001B[93m\nСНЯТИЕ ДЕНЕГ:\u001B[0m");
                 if(serviceUser.getActivUser().getRole() == Role.BLOCKED_TRANSACTION) {
                     System.out.println("\u001B[31mОперация не выполнена!\u001B[0m");
                     break;
                 }
-                checkSize = printCheckList(serviceUser.getActivUser(),"\u001B[33mСписок ваших счетов: \u001B[0m");
+                int checkSize = printCheckList(serviceUser.getActivUser(),"\u001B[33mСписок ваших счетов: \u001B[0m");
                 if(checkSize == 0) {
                     break;
                 }
                 System.out.println("\u001B[92m0 - отмена\u001B[0m");
-                numberCheck = inputChoiceInt(0, checkSize,
+                int idCheck = inputChoiceInt(0, checkSize,
                         "\u001B[36mВведите номер счета для снятия денег: \u001B[0m");
-                if (numberCheck == 0) break;
-                Check check = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(), numberCheck);
+                if (idCheck == 0) break;
+                Check check = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(), idCheck);
                 if(check.isStatus() == false) {
                     System.out.println("\u001B[31mОперация не выполнена! Ваш счет закрыт!\u001B[0m");
                     break;
                 }
-                tempSumma = inputChoiceDoubl(0, "\u001B[36mВведите сумму: \u001B[0m");
-                isTakeMoney = serviceCheck.takeMoney(serviceUser.getActivUser(), numberCheck, tempSumma);
+                double summa = inputChoiceDouble(0, "\u001B[36mВведите сумму: \u001B[0m");
+                boolean isTakeMoney = serviceCheck.takeMoney(serviceUser.getActivUser(), idCheck, summa);
                 if (isTakeMoney == true) {
                     System.out.println("\u001B[33mОперация успешно выполнена!\u001B[0m");
                 }
-//                else {
-//                    System.out.println("\u001B[31mОперация не выполнена!\u001B[0m");
-//                }
                 break;
-            case 3://Внесение денег
+            case 3:
                 System.out.println("\u001B[93m\nВНЕСЕНИЕ ДЕНЕГ:\u001B[0m");
                 if(serviceUser.getActivUser().getRole() == Role.BLOCKED_TRANSACTION) {
                     System.out.println("\u001B[31mОперация не выполнена!\u001B[0m");
@@ -274,23 +259,23 @@ public class Menu {
                     break;
                 }
                 System.out.println("\u001B[92m0 - отмена\u001B[0m");
-                numberCheck = inputChoiceInt(0, checkSize,
+                idCheck = inputChoiceInt(0, checkSize,
                         "\u001B[36mВведите номер счета для зачисления денег: \u001B[0m");
-                if (numberCheck == 0) break;
-                check = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(), numberCheck);
+                if (idCheck == 0) break;
+                check = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(), idCheck);
                 if(check.isStatus() == false) {
                     System.out.println("\u001B[31mОперация не выполнена! Счет закрыт!\u001B[0m");
                     break;
                 }
-                tempSumma = inputChoiceDoubl(0, "\u001B[36mВведите сумму денег: \u001B[0m");
-                isDepositMoney = serviceCheck.depositMoney(serviceUser.getActivUser(), numberCheck, tempSumma);
+                summa = inputChoiceDouble(0, "\u001B[36mВведите сумму денег: \u001B[0m");
+                boolean isDepositMoney = serviceCheck.depositMoney(serviceUser.getActivUser(), idCheck, summa);
                 if (isDepositMoney == true) {
                     System.out.println("\u001B[33mОперация успешно выполнена!\u001B[0m");
                 } else {
                     System.out.println("\u001B[31mОперация не выполнена!\u001B[0m");
                 }
                 break;
-            case 4://Перевод денег
+            case 4:
                 System.out.println("\u001B[93m\nПЕРЕВОД ДЕНЕГ:\u001B[0m");
                 if(serviceUser.getActivUser().getRole() == Role.BLOCKED_TRANSACTION) {
                     System.out.println("\u001B[31mОперация не выполнена!\u001B[0m");
@@ -304,37 +289,37 @@ public class Menu {
                 if (choice == 0) break;
                 checkSize = printCheckList(serviceUser.getActivUser(),"\u001B[33mСписок Ваших счетов: \u001B[0m");
                 System.out.println("\u001B[92m0 - отмена\u001B[0m");
-                numberCheck = inputChoiceInt(0, checkSize,
+                idCheck = inputChoiceInt(0, checkSize,
                         "\u001B[36mВведите номер Вашего счета, с которого будут сняты деньги: \u001B[0m");
-                if (numberCheck == 0) break;
-                check = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(), numberCheck);
+                if (idCheck == 0) break;
+                check = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(), idCheck);
                 if(check.isStatus() == false) {
-                    System.out.println("\u001B[31mОперация не выполнена! Счет: \u001B[0m'" + numberCheck
+                    System.out.println("\u001B[31mОперация не выполнена! Счет: \u001B[0m'" + idCheck
                             + "'\u001B[31m закрыт!\u001B[0m");
                     break;
                 }
-                tempSumma = inputChoiceDoubl(0,
+                summa = inputChoiceDouble(0,
                         "\u001B[36mВведите сумму для перевода денежных средств: \u001B[0m");
                 if(choice == 1) {
-                    numberCheck2 = inputChoiceInt(1, checkSize,
+                    int idCheck2 = inputChoiceInt(1, checkSize,
                             "\u001B[36mСчет для зачисления средств: \u001B[0m");
-                    Check check2 = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(),numberCheck2);
+                    Check check2 = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(),idCheck2);
                     if(check2.isStatus() == false) {
                         System.out.println("\u001B[31mОперация не выполнена! Счет: \u001B[0m'"
-                                + numberCheck2 + "'\u001B[31m закрыт!\u001B[0m");
+                                + idCheck2 + "'\u001B[31m закрыт!\u001B[0m");
                         break;
                     }
-                    isTransferMoney = serviceCheck.transferMoneyToMe(serviceUser.getActivUser(), numberCheck,
-                            numberCheck2, tempSumma);
+                    boolean isTransferMoney = serviceCheck.transferMoneyToMe(serviceUser.getActivUser(), idCheck,
+                            idCheck2, summa);
                     if(isTransferMoney == true) {
-                        Check chec = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(),numberCheck);
-                        System.out.println("\u001B[33mСумма: \u001B[0m" + tempSumma + chec.getCurrencyName() +
-                                "\u001B[33m  успешно переведена на Ваш счет: \u001B[0m'" +  numberCheck2 + "'");
+                        Check chec = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(),idCheck);
+                        System.out.println("\u001B[33mСумма: \u001B[0m" + summa + chec.getCurrencyName() +
+                                "\u001B[33m  успешно переведена на Ваш счет: \u001B[0m'" +  idCheck2 + "'");
                     }
                 }
                 if(choice == 2) {
                     printUsers(serviceUser.getActivUser());
-                    idUserTransfer = inputIdUser("\u001B[36mВведите ID пользователя для перевода средств: \u001B[0m");
+                    int idUserTransfer = inputIdUser("\u001B[36mВведите ID пользователя для перевода средств: \u001B[0m");
                     if(serviceUser.getUserById(idUserTransfer).getRole() == Role.BLOCKED_TRANSACTION) {
                         System.out.println("\u001B[31mОперация не выполнена!\u001B[0m");
                         break;
@@ -349,20 +334,20 @@ public class Menu {
                             "\u001B[33mСписок счетов пользователя: \u001B[0m'" + serviceUser.getUserById(idUserTransfer).getFirstName() +
                                     " " + serviceUser.getUserById(idUserTransfer).getLastName() + "' : ");
                     System.out.println("\u001B[92m0 - отмена\u001B[0m");
-                    numberCheck2 = inputChoiceInt(0, checkSize2,
+                    int idCheck2 = inputChoiceInt(0, checkSize2,
                             "\u001B[36mВведите номер счета получателя: \u001B[0m");
-                    if (numberCheck2 == 0) break;
-                    Check check3 = serviceCheck.getCheckByIdUserIdCheck(idUserTransfer, numberCheck2);
+                    if (idCheck2 == 0) break;
+                    Check check3 = serviceCheck.getCheckByIdUserIdCheck(idUserTransfer, idCheck2);
                     if(check3.isStatus() == false) {
                         System.out.println("\u001B[31mОперация не выполнена!\u001B[0m");
                         break;
                     }
                     User userRecipient = serviceUser.getUserById(idUserTransfer);
-                    isTransferMoney = serviceCheck.transferMoneyToUser(serviceUser.getActivUser(),
-                            userRecipient, numberCheck, numberCheck2, tempSumma);
+                    boolean isTransferMoney = serviceCheck.transferMoneyToUser(serviceUser.getActivUser(),
+                            userRecipient, idCheck, idCheck2, summa);
                     if(isTransferMoney == true ) {
-                        Check chec = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(), numberCheck);
-                        System.out.println("\u001B[33mСумма: \u001B[0m" + tempSumma + chec.getCurrencyName() +
+                        Check chec = serviceCheck.getCheckByIdUserIdCheck(serviceUser.getActivUser().getIdUser(), idCheck);
+                        System.out.println("\u001B[33mСумма: \u001B[0m" + summa + chec.getCurrencyName() +
                                 "\u001B[33m  успешно переведена на счет пользователя: \u001B[0m" + userRecipient.getFirstName() +
                                 " " + userRecipient.getLastName());
                     }else {
@@ -370,11 +355,11 @@ public class Menu {
                     }
                 }
                 break;
-            case 5://История Транзакций
+            case 5:
                 System.out.println("\u001B[93m\nИСТОРИЯ ТРАНЗАКЦИИ:\u001B[0m");
                 printTransactionUser(serviceUser.getActivUser());
                 break;
-            case 6://Курсы Валют
+            case 6://Курс валют
                 System.out.println("\n");
                 Optional<CourseCurrency> optCourseLast = Optional.ofNullable(serviceCourse.getCourseLast());
                 if(optCourseLast.isEmpty() || optCourseLast.get() == null) {
@@ -385,12 +370,11 @@ public class Menu {
                 System.out.println("\u001B[33mОсновная валюта: \u001B[0m'" + optCourseLast.get().getCurrencyMain() + "'");
                 Map<String ,Double> course = optCourseLast.get().getCourse();
                 Map<String,String> courseFullName = optCourseLast.get().getCourseFillName();
-                String nameCurr = "";
                 for (Map.Entry<String,Double> entry : course.entrySet()) {
-                    nameCurr = courseFullName.get(entry.getKey());
-                    //   System.out.println(nameCurr+" "+entry.getKey()+" : "+entry.getValue());
-                    System.out.println("\u001B[35mВалюта: \u001B[0m'" + nameCurr + "'" + " ".repeat(23 - nameCurr.length())
-                            + entry.getKey() + "\u001B[35m Курс -> \u001B[0m" + entry.getValue());
+                    String currencyName = courseFullName.get(entry.getKey());
+                    System.out.println("\u001B[35mВалюта: \u001B[0m'" + currencyName + "'" +
+                            " ".repeat(23 - currencyName.length()) + entry.getKey() +
+                            "\u001B[35m Курс -> \u001B[0m" + entry.getValue());
                 }
                 break;
             default:
@@ -429,33 +413,32 @@ public class Menu {
 
     private void showAdminMenuCase(int input) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//        int num = 0;
         switch (input) {
             case 0:
                 exitAdminMenu = true;
                 System.out.println("Вы вышли из МЕНЮ АДМИНИСТРАТОРА.");
                 break;
-            case 1://Регистрация нового пользователя
+            case 1:
                 System.out.println("\u001B[93m\nРЕГИСТРАЦИЯ НОВОГО ПОЛЬЗОВАТЕЛЯ:\u001B[0m");
                 registrationUser();
                 break;
-            case 2://Изменение пароля пользователя
+            case 2:
                 System.out.println("\u001B[93m\nИЗМЕНИТЬ ПАРОЛЬ ПОЛЬЗОВАТЕЛЯ:\u001B[0m");
                 printUsers(serviceUser.getActivUser());
                 int idUser = inputIdUser("\u001B[36mВведите ID пользователя для изменения пароля: \u001B[0m");
                 System.out.print("\u001B[36mВведите новый пароль пользователя: \u001B[0m");
-                String password = scanner.nextLine().trim();
-                boolean isPassUpdate = serviceUser.userUpdatePassword(idUser, password.trim());
+                String newPassword = scanner.nextLine().trim();
+                boolean isPassUpdate = serviceUser.userUpdatePassword(idUser, newPassword.trim());
                 if(isPassUpdate == true) {
                     System.out.println("\u001B[33mПароль успешно изменен!\u001B[0m");
                 } else {
                     System.out.println("\u001B[91mПароль не изменен!\u001B[0m");
                 }
                 break;
-            case 3://Изменение Статуса пользователя
+            case 3:
                 System.out.println("\u001B[93m\nИЗМЕНИТЬ СТАТУС ПОЛЬЗОВАТЕЛЯ:\u001B[0m");
                 printUsers(serviceUser.getActivUser());
-                int idUserStat = inputIdUser("\u001B[36mВведите ID пользователя для изменения статуса: \u001B[0m");
+                int idUserStatus = inputIdUser("\u001B[36mВведите ID пользователя для изменения статуса: \u001B[0m");
                 int newStatus = inputChoiceInt(1, 4,
                         "\u001B[36m\nВведите новый статус пользователя\u001B[0m" +
                                 "\u001B[92m\n (1 - User,  2 - BLOCKED,  3 - BLOCKED_TRANSACTION,  4 - ADMIN): \u001B[0m");
@@ -466,51 +449,54 @@ public class Menu {
                 if (newStatus == 3) role = Role.BLOCKED_TRANSACTION;
                 if (newStatus == 4) role = Role.ADMIN;
                 if (role != null) {
-                    isUpdate = serviceUser.userStatusUpdate(idUserStat, role);
+                    isUpdate = serviceUser.userStatusUpdate(idUserStatus, role);
                 }
                 if(isUpdate == true) {
-                    System.out.println("\u001B[33m\nСтатус пользователя: \u001B[0m'" + serviceUser.getUserById(idUserStat).getFirstName() +
-                            " " + serviceUser.getUserById(idUserStat).getLastName() + "'\u001B[33m изменен на: \u001B[0m" + role);
+                    System.out.println("\u001B[33m\nСтатус пользователя: \u001B[0m'" +
+                            serviceUser.getUserById(idUserStatus).getFirstName() + " " +
+                            serviceUser.getUserById(idUserStatus).getLastName() +
+                            "'\u001B[33m изменен на: \u001B[0m" + role);
                 } else {
                     System.out.println("\u001B[91mСтатус пользователя не изменен!\u001B[0m");
                 }
                 break;
-            case 4://Открыть счет пользователю
+            case 4:
                 System.out.println("\u001B[93m\nОТКРЫТЬ СЧЕТ ПОЛЬЗОВАТЕЛЮ:\u001B[0m");
                 printUsers(serviceUser.getActivUser());
                 int idUserCheck = inputIdUser("\u001B[36mВведите ID пользователя: \u001B[0m");
                 Map<String, Double> lastCourse = serviceCourse.getCourseLast().getCourse();
-                List<String> listCurse = new ArrayList<>();
+                List<String> listCurrency = new ArrayList<>();
                 for (Map.Entry<String, Double> entry : lastCourse.entrySet()) {
-                    listCurse.add(entry.getKey());
+                    listCurrency.add(entry.getKey());
                 }
                 System.out.println("\u001B[33m\nСписок валют:\u001B[0m");
                 int i = 0;
-                for (String name : listCurse) {
+                for (String name : listCurrency) {
                     i++;
                     System.out.println("\u001B[35mID: \u001B[0m" + i + "\u001B[35m  Обозначение: \u001B[0m" + name);
                 }
-                int idCurrency = inputChoiceInt(1, listCurse.size(),
+                int idCurrency = inputChoiceInt(1, listCurrency.size(),
                         "\u001B[36mВведите ID валюты: \u001B[0m");
-                boolean isCheckAdd = serviceCheck.addCheckUser(listCurse.get(idCurrency - 1), true,
+                boolean isCheckAdd = serviceCheck.addCheckUser(listCurrency.get(idCurrency - 1), true,
                         0, LocalDate.now(), idUserCheck);
                 if(isCheckAdd == true){
-                    System.out.println("\u001B[33mНовый счет пользователя: \u001B[0m'" + serviceUser.getUserById(idUserCheck).getFirstName()
-                           + " " + serviceUser.getUserById(idUserCheck).getLastName() + "'\u001B[33m открыт!\u001B[0m");
+                    System.out.println("\u001B[33mНовый счет пользователя: \u001B[0m'" +
+                            serviceUser.getUserById(idUserCheck).getFirstName() + " " +
+                            serviceUser.getUserById(idUserCheck).getLastName() + "'\u001B[33m открыт!\u001B[0m");
                 }else{
                     System.out.println("\u001B[91mСчет пользователя не открыт!\u001B[0m");
                 }
                 break;
-            case 5://Закрыть счет пользователю
+            case 5:
                 System.out.println("\u001B[93m\nЗАБЛОКИРОВАТЬ СЧЕТ ПОЛЬЗОВАТЕЛЯ:\u001B[0m");
                 printUsers(serviceUser.getActivUser());
                 int idUserClose = inputIdUser("\u001B[36mВведите ID пользователя: \u001B[0m");
-                Optional<List<Check>> optCheckList = Optional.ofNullable(serviceCheck.getUserChecks(idUserClose));
-                if(optCheckList.isEmpty()) {
+                Optional<List<Check>> listChecks = Optional.ofNullable(serviceCheck.getUserChecks(idUserClose));
+                if(listChecks.isEmpty()) {
                     break;
                 }
-                int numChecks = printCheckList(serviceUser.getUserById(idUserClose), "\u001B[33mСписок счетов: \u001B[0m");
-                int idCheck = inputChoiceInt(1, numChecks, "\u001B[36mВведите ID счета: \u001B[0m");
+                int numberChecks = printCheckList(serviceUser.getUserById(idUserClose),"\u001B[33mСписок счетов: \u001B[0m");
+                int idCheck = inputChoiceInt(1, numberChecks, "\u001B[36mВведите ID счета: \u001B[0m");
                 boolean isClosed = serviceCheck.closeCheckUser(idUserClose, idCheck);
                 if(isClosed == true) {
                     System.out.println("\u001B[31mПользователю: \u001B[0m'" +
@@ -521,21 +507,21 @@ public class Menu {
                     System.out.println("\u001B[91mОперация не выполнена!\u001B[0m" );
                 }
                 break;
-            case 6://Разблокировать счет пользователю
+            case 6:
                 System.out.println("\u001B[93m\nРАЗБЛОКИРОВАТЬ СЧЕТ ПОЛЬЗОВАТЕЛЯ:\u001B[0m");
                 printUsers(serviceUser.getActivUser());
                 int idUserUnblock = inputIdUser("\u001B[36mВведите ID пользователя: \u001B[0m");
-                int numChecks1 = printCheckList(serviceUser.getUserById(idUserUnblock), "\u001B[33mСписок счетов:\u001B[0m");
+                int numberChecks1 = printCheckList(serviceUser.getUserById(idUserUnblock),"\u001B[33mСписок счетов:\u001B[0m");
                 Optional<List<Check>> optCheckList1 = Optional.ofNullable(serviceCheck.getUserChecks(idUserUnblock));
                 if(optCheckList1.isEmpty()) {
                     break;
                 }
-                int idCheck1 = inputChoiceInt(1, numChecks1, "\u001B[36mВведите ID счета: \u001B[0m");
-                boolean isUnClosed = serviceCheck.unblockCheckUser(idUserUnblock, idCheck1);
-                if(isUnClosed == true) {
-                    System.out.println("\u001B[33mПользователю: \u001B[0m'" + serviceUser.getUserById(idUserUnblock).getFirstName() +
-                            " " + serviceUser.getUserById(idUserUnblock).getLastName() + "'\u001B[33m  счет № \u001B[0m'" +
-                            idCheck1 + "'\u001B[33m  открыт\u001B[0m");
+                int idCheck1 = inputChoiceInt(1, numberChecks1, "\u001B[36mВведите ID счета: \u001B[0m");
+                boolean isUnclosed = serviceCheck.unblockCheckUser(idUserUnblock, idCheck1);
+                if(isUnclosed == true) {
+                    System.out.println("\u001B[33mПользователю: \u001B[0m'" + serviceUser.getUserById(idUserUnblock).getFirstName()
+                           + " " + serviceUser.getUserById(idUserUnblock).getLastName() +
+                            "'\u001B[33m  счет № \u001B[0m'" + idCheck1 + "'\u001B[33m  открыт\u001B[0m");
                 } else {
                     System.out.println("\u001B[91mОперация не выполнена!\u001B[0m" );
                 }
@@ -543,19 +529,19 @@ public class Menu {
             case 7://Список всех пользователей
                 printUsers(serviceUser.getActivUser());
                 break;
-            case 8:// Состояние счетов пользователя
+            case 8:
                 System.out.println("\u001B[93m\nОСТАТОК НА СЧЕТУ ПОЛЬЗОВАТЕЛЯ:\u001B[0m");
                 printUsers(serviceUser.getActivUser());
                 idUser = inputIdUser("\u001B[36mВведите ID пользователя: \u001B[0m");
                 printCheckList(serviceUser.getUserById(idUser), "\u001B[33mСписок счетов:\u001B[0m");
                 break;
-            case 9://История Транзакций пользователя
+            case 9:
                 System.out.println("\u001B[93m\nИСТОРИЯ ТРАНЗАКЦИЙ ПОЛЬЗОВАТЕЛЯ:\u001B[0m");
                 printUsers(serviceUser.getActivUser());
                 idUser = inputIdUser("\u001B[36mВведите ID пользователя: \u001B[0m");
                 printTransactionUser(serviceUser.getUserById(idUser));
                 break;
-            case 10:// Удаление пользователя
+            case 10:
                 System.out.println("\u001B[93m\nУДАЛИТЬ ПОЛЬЗОВАТЕЛЯ:\u001B[0m");
                 printUsers(serviceUser.getActivUser());
                 idUser = inputIdUser( "\u001B[36mВведите ID пользователя: \u001B[0m");
@@ -568,71 +554,67 @@ public class Menu {
                     System.out.println("\u001B[91mОперация не выполнена!\u001B[0m");
                 }
                 break;
-            case 11://Курсы Валют
+            case 11://Курс валют
                 System.out.println("\n");
-                Optional<CourseCurrency> optCourseLast = Optional.ofNullable(serviceCourse.getCourseLast());
-                if(optCourseLast.isEmpty() || optCourseLast.get() == null) {
+                Optional<CourseCurrency> courseLast = Optional.ofNullable(serviceCourse.getCourseLast());
+                if(courseLast.isEmpty() || courseLast.get() == null) {
                     System.out.println("Курс валют отсутствует, сначала создайте новый Курс Валюты.");
                     break;
                 }
                 System.out.println("\u001B[93mКУРС ВАЛЮТ НА: \u001B[0m"
-                        + optCourseLast.get().getDateCurrency().format(formatter));
-                System.out.println("\u001B[33mОсновная валюта: \u001B[0m'" + optCourseLast.get().getCurrencyMain() + "'");
-                Map<String,Double> course = optCourseLast.get().getCourse();
-                Map<String,String> courseFullName = optCourseLast.get().getCourseFillName();
-                String nameCurr = "";
+                        + courseLast.get().getDateCurrency().format(formatter));
+                System.out.println("\u001B[33mОсновная валюта: \u001B[0m'" + courseLast.get().getCurrencyMain() + "'");
+                Map<String,Double> course = courseLast.get().getCourse();
+                Map<String,String> courseFullName = courseLast.get().getCourseFillName();
                 for (Map.Entry<String,Double> entry : course.entrySet()) {
-                    nameCurr = courseFullName.get(entry.getKey());
-                    System.out.println("\u001B[35mВалюта: \u001B[0m'" + nameCurr + "'" + " ".repeat(23 - nameCurr.length())
-                            + entry.getKey() + "\u001B[35m Курс -> \u001B[0m" + entry.getValue());
+                    String nameCurrency = courseFullName.get(entry.getKey());
+                    System.out.println("\u001B[35mВалюта: \u001B[0m'" + nameCurrency + "'" +
+                            " ".repeat(23 - nameCurrency.length()) + entry.getKey() +
+                            "\u001B[35m Курс -> \u001B[0m" + entry.getValue());
                 }
                 break;
-            case 12://Изменение курсов Валют
+            case 12:
                 System.out.println("\u001B[93m\nИЗМЕНЕНИЕ КУРСА ВАЛЮТ:\u001B[0m");
-                Map<String,String> cursNames = courseRepository.getNamesCurrency();
-                Optional<CourseCurrency> optCourseLastUpdate = Optional.ofNullable(serviceCourse.getCourseLast());
-                if(optCourseLastUpdate.isEmpty() || optCourseLastUpdate.get() == null) {
+                Map<String,String> currencyNames = courseRepository.getNamesCurrency();
+                Optional<CourseCurrency> courseLastUpdate = Optional.ofNullable(serviceCourse.getCourseLast());
+                if(courseLastUpdate.isEmpty() || courseLastUpdate.get() == null) {
                     System.out.println("Создаем первый курс валют.");
                     System.out.println("Список доступных валют: ");
-                    CourseCurrency ccNew = new CourseCurrency();
+                    CourseCurrency newCourseCurrency = new CourseCurrency();
                     int i1 = 0;
                     List<String> list = new ArrayList<>();
-                    for (Map.Entry<String,String> entry : cursNames.entrySet()) {
+                    for (Map.Entry<String,String> entry : currencyNames.entrySet()) {
                         i1++;
                         list.add(entry.getKey());
                         System.out.println(i1 + "\u001B[35m Валюта: \u001B[0m'" + entry.getKey() + "' " + entry.getValue());
                     }
                     System.out.println("\u001B[92m0 - Завершить\u001B[0m");
-                    int number = -1;
-                    double kurs = 0;
                     System.out.println();
-                    number = inputChoiceInt(0, cursNames.size(), "\u001B[36mВведите № ОСНОВНОЙ Валюты: \u001B[0m");
-                    ccNew.setCurrencyMain(list.get(number - 1));
-                    ccNew.setDateCurrency(LocalDate.now());
+                    int number = inputChoiceInt(0,currencyNames.size(),"\u001B[36mВведите № ОСНОВНОЙ Валюты: \u001B[0m");
+                    newCourseCurrency.setCurrencyMain(list.get(number - 1));
+                    newCourseCurrency.setDateCurrency(LocalDate.now());
                     System.out.println();
                     while (number != 0) {
-                        number = inputChoiceInt(0, cursNames.size(), "\u001B[36mВведите № валюты: \u001B[0m");
+                        number = inputChoiceInt(0,currencyNames.size(),"\u001B[36mВведите № валюты: \u001B[0m");
                         if (number == 0) break;
-                        kurs = inputChoiceDoubl(0,"Курс валюты по отношению к '" +
-                                ccNew.getCurrencyMain() + "' -> ");
-                        ccNew.getCourse().put(list.get(number - 1), kurs);
-                        ccNew.getCourseFillName().put(list.get(number - 1),
+                        double kurs = inputChoiceDouble(0,"Курс валюты по отношению к '" +
+                                newCourseCurrency.getCurrencyMain() + "' -> ");
+                        newCourseCurrency.getCourse().put(list.get(number - 1), kurs);
+                        newCourseCurrency.getCourseFillName().put(list.get(number - 1),
                                 courseRepository.getNamesCurrency().get(list.get(number - 1)));
                     }
-                    serviceCourse.addCourse(ccNew);
+                    serviceCourse.addCourse(newCourseCurrency);
                 }
-                if(optCourseLastUpdate.isPresent()) {
+                if(courseLastUpdate.isPresent()) {
                     System.out.println("\u001B[33mОсновная валюта: \u001B[0m'" + serviceCourse.getCurrencyMain() + "'");
-                    double curs = 0;
                     Map<String,Double> lastCourse1 = serviceCourse.getCourseLast().getCourse();
                     String cName = serviceCourse.getCurrencyMain();
                     Map<String,Double> newMap = new LinkedHashMap<>();
                     Map<String,String> courseFullName1 = serviceCourse.getCourseLast().getCourseFillName();
-                    String nameCurs1 = "";
                     for (Map.Entry<String, Double> entry : lastCourse1.entrySet()) {
-                        nameCurs1 = courseFullName1.get(entry.getKey());
+                        String nameCurs1 = courseFullName1.get(entry.getKey());
                         System.out.print("\u001B[35mВалюта: \u001B[0m'" + nameCurs1 + "' " + entry.getKey());
-                        curs = inputChoiceDoubl(0, "\u001B[35m Новый курс -> \u001B[0m");
+                        double curs = inputChoiceDouble(0, "\u001B[35m Новый курс -> \u001B[0m");
                         newMap.put(entry.getKey(), curs);
                     }
                     CourseCurrency newCurs = new CourseCurrency();
@@ -643,56 +625,55 @@ public class Menu {
                     serviceCourse.addCourse(newCurs);
                 }
                 break;
-            case 13://История курсов Валют
+            case 13:
                 System.out.println("\u001B[93m\nИСТОРИЯ КУРСА ВАЛЮТ: \u001B[0m");
-                Optional<List<CourseCurrency>> optCurses = Optional.ofNullable(serviceCourse.getCourses());
-                if(optCurses.isEmpty() || optCurses.get().size() == 0) {
+                Optional<List<CourseCurrency>> curses = Optional.ofNullable(serviceCourse.getCourses());
+                if(curses.isEmpty() || curses.get().size() == 0) {
                     System.out.println("Курс валюты отсутствует!");
                     break;
                 }
-                for (CourseCurrency cs:optCurses.get()) {
+                for (CourseCurrency cs:curses.get()) {
                     Map<String, Double> map = new LinkedHashMap<>();
                     Map<String, String> mapName = new LinkedHashMap<>();
                     map = cs.getCourse();
                     mapName = cs.getCourseFillName();
-                    String nameCurs2 = "";
                     System.out.println("\u001B[93mКурс валют на: \u001B[0m'" + cs.getDateCurrency().format(formatter) + "'");
                     System.out.println("\u001B[33mОсновная валюта: \u001B[0m'" + cs.getCurrencyMain() + "'");
                     for (Map.Entry<String, Double> entry : map.entrySet()) {
-                        nameCurs2 = mapName.get(entry.getKey());
-                        System.out.println("\u001B[35mВалюта: \u001B[0m'" + nameCurs2 + "'" + " ".repeat(23 - nameCurs2.length())
-                                + entry.getKey() + "\u001B[35m Курс -> \u001B[0m" + entry.getValue());
+                        String nameCurs2 = mapName.get(entry.getKey());
+                        System.out.println("\u001B[35mВалюта: \u001B[0m'" + nameCurs2 + "'" +
+                                " ".repeat(23 - nameCurs2.length()) + entry.getKey() +
+                                "\u001B[35m Курс -> \u001B[0m" + entry.getValue());
                     }
                     System.out.println();
                 }
                 break;
-            case 14://Добавить новую Валюту в курсы Валют
+            case 14:
                 System.out.println("\u001B[93m\nДОБАВИТЬ НОВУЮ ВАЛЮТУ:\u001B[0m");
-                Optional<CourseCurrency> optCourseLast1 = Optional.ofNullable(serviceCourse.getCourseLast());
-                if(optCourseLast1.isEmpty() || optCourseLast1.get() == null) {
+                Optional<CourseCurrency> courseLast1 = Optional.ofNullable(serviceCourse.getCourseLast());
+                if(courseLast1.isEmpty() || courseLast1.get() == null) {
                     System.out.println("Курс валют отсутствует. Необходимо создайть новый курс валют");
                     break;
                 }
-                System.out.println("\u001B[93mСПИСОК И КУРС ВАЛЮТ НА: \u001B[0m" + optCourseLast1.get().getDateCurrency().format(formatter));
-                System.out.println("\u001B[33mОсновная валюта: \u001B[0m'" + optCourseLast1.get().getCurrencyMain() + "'");
-                Map<String,Double> course1 = optCourseLast1.get().getCourse();
-                Map<String,String> coursFullNam = optCourseLast1.get().getCourseFillName();
-                String nameCurse = "";
+                System.out.println("\u001B[93mСПИСОК И КУРС ВАЛЮТ НА: \u001B[0m" + courseLast1.get().getDateCurrency().format(formatter));
+                System.out.println("\u001B[33mОсновная валюта: \u001B[0m'" + courseLast1.get().getCurrencyMain() + "'");
+                Map<String,Double> course1 = courseLast1.get().getCourse();
+                Map<String,String> courseFullName1 = courseLast1.get().getCourseFillName();
                 for (Map.Entry<String,Double> entry : course1.entrySet()) {
-                    nameCurse = coursFullNam.get(entry.getKey());
+                    String nameCurse = courseFullName1.get(entry.getKey());
                     System.out.println("\u001B[35mВалюта: \u001B[0m'" + nameCurse + "'" + " ".repeat(23-nameCurse.length())
                             + entry.getKey() + "\u001B[35m Курс -> \u001B[0m" + entry.getValue());
                 }
                 System.out.print("\u001B[36mВведите обозначение 'Новой Валюты' из трех заглавных латинских букв: \u001B[0m");
-                String newCurrName = scanner.nextLine().trim();
-                System.out.print("\u001B[36mВведите полное название Новой Валюты \u001B[0m'" + newCurrName + "': ");
-                String newCurrFullName = scanner.nextLine().trim();
-                double newCursCar = inputChoiceDoubl(0,"\u001B[36mВведите курс валюты: \u001B[0m'"
-                        + newCurrName + "'\u001B[36m  по отношению к основной валюте \u001B[0m'"
-                        + optCourseLast1.get().getCurrencyMain() + "'\u001B[36m -> \u001B[0m");
-                boolean isAddCurr = serviceCourse.addNewCurrency(newCurrName, newCurrFullName, newCursCar);
+                String newCurrencyName = scanner.nextLine().trim();
+                System.out.print("\u001B[36mВведите полное название Новой Валюты \u001B[0m'" + newCurrencyName + "': ");
+                String newCurrencyFullName = scanner.nextLine().trim();
+                double newCource = inputChoiceDouble(0,"\u001B[36mВведите курс валюты: \u001B[0m'"
+                        + newCurrencyName + "'\u001B[36m  по отношению к основной валюте \u001B[0m'"
+                        + courseLast1.get().getCurrencyMain() + "'\u001B[36m -> \u001B[0m");
+                boolean isAddCurr = serviceCourse.addNewCurrency(newCurrencyName, newCurrencyFullName, newCource);
                 if(isAddCurr == true) {
-                    System.out.println("\u001B[33mНовая Валюта: \u001B[0m'" + newCurrName
+                    System.out.println("\u001B[33mНовая Валюта: \u001B[0m'" + newCurrencyName
                             + "'\u001B[33m добавлена в Кусы Валют.\u001B[0m");
                 } else {
                     System.out.println("\u001B[91mОперация не выполнена!\u001B[0m!");
@@ -704,34 +685,33 @@ public class Menu {
     }
 
     private int printCheckList(User user, String str){
-        Optional<List<Check>> optCheckList = Optional.ofNullable(serviceCheck.getUserChecks(user.getIdUser()));
+        Optional<List<Check>> checkList = Optional.ofNullable(serviceCheck.getUserChecks(user.getIdUser()));
         try {
-            Validator.getUserChecks(optCheckList, user.getIdUser());
+            Validator.getUserChecks(checkList, user.getIdUser());
         } catch (ValidatorException e) {
             return 0;
         }
         System.out.println(str);
-        for (Check check : optCheckList.get()) {
-            String sumStr = new DecimalFormat("#0.00").format(check.getSumma());
+        for (Check check : checkList.get()) {
+            String strings = new DecimalFormat("#0.00").format(check.getSumma());
             System.out.print("\u001B[35mСчет: \u001B[0m" + check.getIdCheck() + "\u001B[35m  Валюта: \u001B[0m"
                     + check.getCurrencyName());
             if (serviceUser.getActivUser().getRole() == Role.ADMIN || user == serviceUser.getActivUser()) {
-                System.out.print("\u001B[35m    Сумма на счету: \u001B[0m" + sumStr + " " + check.getCurrencyName()
+                System.out.print("\u001B[35m    Сумма на счету: \u001B[0m" + strings + " " + check.getCurrencyName()
                         + (check.isStatus() ? "\u001B[35m открыт: \u001B[0m" + check.getOpenDate()
                         : "\u001B[35m открыт: \u001B[0m" + check.getOpenDate() + "\u001B[35m закрыт: \u001B[0m"
                         + check.getCloseDate()));
             }
             System.out.println();
         }
-        return optCheckList.get().size();
+        return checkList.get().size();
     }
 
     private int inputChoiceInt (int min, int max, String comment){
-        int choice = -1;
         while (true) {
             System.out.print(comment);
             if (scanner.hasNextInt() == true) {
-                choice = scanner.nextInt();
+                int choice = scanner.nextInt();
                 scanner.nextLine();
                 if(choice >= min && choice <= max) {
                     return choice;
@@ -745,26 +725,23 @@ public class Menu {
         }
     }
 
-    private double inputChoiceDoubl (double min, String comment){
-        String str = "";
-        String str1 = "";
-        double choice = 0;
+    private double inputChoiceDouble(double min, String comment){
         Double choice1 = null;
         while (true) {
             System.out.print(comment);
-            str = scanner.nextLine();
+            String str = scanner.nextLine();
             if(str.length() == 0) {
                 System.out.println("\u001B[91mНеправильный ввод\u001B[0m");
                 continue;
             }
-            str1 = str.replace(",", ".");
+            str = str.replace(",", ".");
             try {
-                choice1 = Double.parseDouble(str1.trim());
+                choice1 = Double.parseDouble(str.trim());
             } catch (NumberFormatException e) {
                 System.out.println("\u001B[91mНеправильный ввод\u001B[0m");
                 continue;
             }
-            choice = Double.valueOf(choice1);
+            double choice = Double.valueOf(choice1);
             if(choice > min) {
                 return choice;
             } else {
@@ -774,35 +751,34 @@ public class Menu {
     }
 
     private void printTransactionUser(User user){
-        Optional<List<Transaction>> optTransactionList = Optional.ofNullable(serviceCheck.getTransactionListByIdUser(user.getIdUser()));
+        Optional<List<Transaction>> transactionList = Optional.ofNullable(serviceCheck.getTransactionListByIdUser(user.getIdUser()));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        if(optTransactionList.isEmpty() || optTransactionList.get().size() == 0) {
+        if(transactionList.isEmpty() || transactionList.get().size() == 0) {
             System.out.println("\u001B[33mЕще не было транзакций ...\u001B[0m");
             return;
         }
-        for (Transaction tr : optTransactionList.get()){
+        for (Transaction tr : transactionList.get()){
             String s = "\u001B[35mТранзакция №: \u001B[0m" + tr.getNumberTransaction() + "\u001B[35m  Валюта: \u001B[0m'"+
                     tr.getCurrencyName() + "'\u001B[35m  Тип: \u001B[0m";
             if(tr.getTypeTransaction() == TransactionName.TAKE_MONEY) s = s + " 'Снятие средств'     ";
             if(tr.getTypeTransaction() == TransactionName.DEPOSIT_MONEY) s = s + " 'Внесение средств'   ";
             if(tr.getTypeTransaction() == TransactionName.TRANSFER_MONEY_IN) s = s + " 'Получение переводом' ";
             if(tr.getTypeTransaction() == TransactionName.TRANSFER_MONEY_OUT) s = s + " 'Снятие переводом'   ";
-
             if(tr.getIdUserRecipient() == serviceUser.getActivUser().getIdUser() ){
                 s = s + "\u001B[35mПолучатель: \u001B[0m'ВЫ'";
             }
             if(tr.getIdUserRecipient() != serviceUser.getActivUser().getIdUser()){
-                s = s + "\u001B[35mПолучатель: \u001B[0m'" + serviceUser.getUserById(tr.getIdUserRecipient()).getFirstName() + " " +
-                        serviceUser.getUserById(tr.getIdUserRecipient()).getLastName() + "' ";
+                s = s + "\u001B[35mПолучатель: \u001B[0m'" + serviceUser.getUserById(tr.getIdUserRecipient()).getFirstName()
+                        + " " + serviceUser.getUserById(tr.getIdUserRecipient()).getLastName() + "' ";
             }
-            if(tr.getIdUserOut() == serviceUser.getActivUser().getIdUser() &&
-                    tr.getIdUserOut() !=0){
+            if(tr.getIdActiveUser() == serviceUser.getActivUser().getIdUser() &&
+                    tr.getIdActiveUser() !=0){
                 s = s + "\u001B[35mОтправитель:\u001B[0m 'ВЫ'";
             }
-            if(tr.getIdUserOut() != serviceUser.getActivUser().getIdUser() &&
-                    tr.getIdUserOut() != 0 ){
-                s = s + "\u001B[35mОтправитель: \u001B[0m'" + serviceUser.getUserById(tr.getIdUserOut()).getFirstName()
-                        + " " + serviceUser.getUserById(tr.getIdUserOut()).getLastName() + "' ";
+            if(tr.getIdActiveUser() != serviceUser.getActivUser().getIdUser() &&
+                    tr.getIdActiveUser() != 0 ){
+                s = s + "\u001B[35mОтправитель: \u001B[0m'" + serviceUser.getUserById(tr.getIdActiveUser()).getFirstName()
+                        + " " + serviceUser.getUserById(tr.getIdActiveUser()).getLastName() + "' ";
             }
             s = s + "\u001B[35mСумма: \u001B[0m" + tr.getSumma() + tr.getCurrencyName();
             s = s + " " + tr.getDateTransaction().format(formatter);
@@ -813,17 +789,17 @@ public class Menu {
     private void printUsers(User user) {
         String s = "";
         String s1 = "";
-        Optional<Map<Integer, User>> optUsers = Optional.ofNullable(serviceUser.getUsers());
-        if(optUsers.isEmpty() || optUsers.get().size() == 0){
+        Optional<Map<Integer, User>> users = Optional.ofNullable(serviceUser.getUsers());
+        if(users.isEmpty() || users.get().size() == 0){
             System.out.println("\u001B[31m\nВ базе нет пользователей!\u001B[0m");
             return;
         }
         System.out.println("\u001B[93m\nСписок всех пользователей:\u001B[0m");
-        for (Map.Entry<Integer, User> entry : optUsers.get().entrySet()) {
-            int len = entry.getValue().getFirstName().length() + entry.getValue().getLastName().length() + 1;
-            if(len < 20) {s = " ".repeat(20 - len);} else {s = " ".repeat(1);}
-            len = entry.getValue().getRole().toString().length();
-            if(len < 20) {s1 = " ".repeat(20 - len);} else {s1 = " ".repeat(1);}
+        for (Map.Entry<Integer, User> entry : users.get().entrySet()) {
+            int length = entry.getValue().getFirstName().length() + entry.getValue().getLastName().length() + 1;
+            if(length < 20) {s = " ".repeat(20 - length);} else {s = " ".repeat(1);}
+            length = entry.getValue().getRole().toString().length();
+            if(length < 20) {s1 = " ".repeat(20 - length);} else {s1 = " ".repeat(1);}
             System.out.print("\u001B[35mID: \u001B[0m" + entry.getValue().getIdUser() + "  '" + entry.getValue().getFirstName() + " " +
                     entry.getValue().getLastName() + "'");
             if(user.getRole() == Role.ADMIN) {
@@ -836,11 +812,10 @@ public class Menu {
     }
 
     private int inputIdUser(String comment) {
-        int choice = -1;
         while (true) {
             System.out.print(comment);
             if (scanner.hasNextInt() == true) {
-                choice = scanner.nextInt();
+                int choice = scanner.nextInt();
                 scanner.nextLine();
                 Optional<User> optUser = Optional.ofNullable(serviceUser.getUserById(choice));
                 if(optUser.isEmpty()) {
